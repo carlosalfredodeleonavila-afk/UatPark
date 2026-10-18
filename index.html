@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UATPark · Sistema de estacionamiento universitario</title>
+<link rel="icon" type="image/png" href="assets/icon-64.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#F96A01">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="splash-inner">
+    <img class="splash-logo" src="assets/glyph-white.png" alt="UATPark">
+    <p class="splash-title">UATPark</p>
+    <p class="splash-sub">Sistema de estacionamiento universitario</p>
+  </div>
+</div>
+
+<div class="device sin-menu">
+
+  <!-- BARRA SUPERIOR -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img class="logo-img" src="assets/glyph-white.png" alt="">
+      <span class="brand-name">UATPark</span>
+    </div>
+    <button class="icon-btn" id="btnNotif" aria-label="Notificaciones" hidden>
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 22c1.3 0 2.4-1 2.4-2.3h-4.8C9.6 21 10.7 22 12 22zm7-6.3V11c0-3.4-2.2-6.2-5.4-6.9V3a1.6 1.6 0 0 0-3.2 0v1.1C7.2 4.8 5 7.6 5 11v4.7L3 17.6v1H21v-1l-2-1.9z" fill="currentColor"/></svg>
+      <span class="badge" id="notifBadge" hidden>0</span>
+    </button>
+  </header>
+
+  <!-- CONTENIDO -->
+  <main class="screen" id="app">
+
+    <!-- ===================== AUTENTICACIÓN ===================== -->
+    <section class="view" id="view-auth" data-view>
+      <div class="hero-auth">
+        <img class="hero-logo" src="assets/logo-full.png" alt="UATPark">
+        <h1>Estaciónate sin vueltas</h1>
+        <p class="muted">Consulta, reserva y accede al estacionamiento del campus Victoria con tu cuenta institucional.</p>
+      </div>
+
+      <div class="tabs" id="authTabs">
+        <button class="tab active" data-tab="login">Iniciar sesión</button>
+        <button class="tab" data-tab="registro">Crear cuenta</button>
+      </div>
+
+      <!-- LOGIN -->
+      <form class="pane active" id="paneLogin" data-pane="login" novalidate>
+        <label>Correo institucional
+          <input type="email" id="loginEmail" placeholder="matricula@alumnos.uat.edu.mx" autocomplete="username" maxlength="80" required>
+        </label>
+        <label>Contraseña
+          <input type="password" id="loginPass" autocomplete="current-password" maxlength="64" required>
+        </label>
+        <div class="form-errors" id="loginError" role="alert" hidden></div>
+        <button type="submit" class="btn-primary">Entrar</button>
+        <p class="hint">Alumnos: matrícula@alumnos.uat.edu.mx · Docentes: usuario@docentes.uat.edu.mx</p>
+      </form>
+
+      <!-- REGISTRO -->
+      <form class="pane" id="paneRegistro" data-pane="registro" novalidate>
+        <div class="segmented" id="rolSegment">
+          <button type="button" class="seg active" data-rol="estudiante">Estudiante</button>
+          <button type="button" class="seg" data-rol="trabajador">Docente</button>
+        </div>
+
+        <label><span id="lblRegId">Matrícula</span>
+          <input type="text" id="regId" maxlength="15" autocomplete="off" required>
+        </label>
+        <label>Nombre completo
+          <input type="text" id="regNombre" maxlength="80" autocomplete="name" required>
+        </label>
+        <label>Correo institucional
+          <input type="email" id="regCorreo" maxlength="80" placeholder="matricula@alumnos.uat.edu.mx" readonly required>
+          <span class="file-hint" id="hintCorreo">Se genera con tu matrícula: matricula@alumnos.uat.edu.mx</span>
+        </label>
+        <label>Contraseña
+          <input type="password" id="regPass" autocomplete="new-password" maxlength="64" required>
+          <span class="file-hint">Mínimo 8 caracteres, con letras y números.</span>
+        </label>
+        <label>Confirma tu contraseña
+          <input type="password" id="regPass2" autocomplete="new-password" maxlength="64" required>
+        </label>
+
+        <div id="campoEstudiante">
+          <label>Horario escolar (turno)
+            <select id="regHorarioEscolar">
+              <option>Matutino</option>
+              <option>Vespertino</option>
+              <option>Mixto</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="campoTrabajador" hidden>
+          <label>Horario laboral
+            <div class="row-2">
+              <input type="time" id="regHorarioInicio" value="08:00">
+              <input type="time" id="regHorarioFin" value="16:00">
+            </div>
+          </label>
+        </div>
+
+        <label class="file-label"><span id="lblDocumento">Constancia de estudios</span>
+          <input type="file" id="regConstancia" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required>
+          <span class="file-hint">PDF, JPG o PNG, máximo 5 MB. La administración la revisa antes de activar tu cuenta.</span>
+        </label>
+
+        <div class="form-errors" id="regErrores" role="alert" hidden></div>
+        <button type="submit" class="btn-primary">Registrarme</button>
+        <p class="hint">Tu información solo se usa para validar tu acceso, según la política de datos de la UAT.</p>
+      </form>
+
+      <div class="card demo-card" id="demoBox">
+        <h3>Modo demostración</h3>
+        <p class="muted small">Entra con cuentas ya cargadas, sin registrarte. Si prefieres escribir los datos: contraseña de las cuentas de ejemplo <strong>Demo2026!</strong> (por ejemplo 20240001@alumnos.uat.edu.mx). Administrador: <strong>admin@uat.edu.mx</strong> con contraseña <strong>Admin2026!</strong>.</p>
+        <div class="demo-grid">
+          <button type="button" class="btn-secondary" data-demo="estudiante">Estudiante</button>
+          <button type="button" class="btn-secondary" data-demo="trabajador">Trabajador</button>
+          <button type="button" class="btn-secondary" data-demo="admin">Administrador</button>
+        </div>
+        <button type="button" class="btn-ghost" id="btnResetDemo">Reiniciar datos de demostración</button>
+      </div>
+    </section>
+
+    <!-- ===================== REGISTRO DE VEHÍCULO ===================== -->
+    <section class="view" id="view-vehiculo" data-view>
+      <h2>Registra tu vehículo</h2>
+      <p class="muted">Relacionamos tu cuenta con un vehículo autorizado para dificultar el uso del estacionamiento por personas externas.</p>
+
+      <div class="switch-row">
+        <label class="switch">
+          <input type="checkbox" id="sinVehiculo">
+          <span class="slider"></span>
+        </label>
+        <span>No cuento con vehículo propio</span>
+      </div>
+
+      <form id="formVehiculo" novalidate>
+        <label>Marca y modelo
+          <input type="text" id="vehMarca" placeholder="Ej. Nissan Versa 2019" maxlength="60" required>
+        </label>
+        <label>Placa
+          <input type="text" id="vehPlaca" placeholder="Ej. TAM-1234" maxlength="12" required>
+        </label>
+        <div class="switch-row inline">
+          <label class="switch small">
+            <input type="checkbox" id="vehOnapafa">
+            <span class="slider"></span>
+          </label>
+          <span>Es placa ONAPAFA</span>
+        </div>
+        <label>Licencia de conducir (número)
+          <input type="text" id="vehLicencia" maxlength="20" required>
+        </label>
+        <div class="form-errors" id="vehErrores" role="alert" hidden></div>
+        <button type="submit" class="btn-primary">Guardar vehículo</button>
+      </form>
+
+      <form id="formSinVehiculo" hidden>
+        <label>Cuéntanos cómo llegas al campus
+          <select id="sinVehMedio">
+            <option>Transporte público</option>
+            <option>Me traen en auto de otra persona</option>
+            <option>Bicicleta</option>
+            <option>A pie</option>
+            <option>Otro</option>
+          </select>
+        </label>
+        <label>¿Te gustaría más información sobre el estacionamiento?
+          <textarea id="sinVehComentario" placeholder="Cuéntanos qué te gustaría saber (opcional)"></textarea>
+        </label>
+        <button type="submit" class="btn-primary">Enviar</button>
+      </form>
+    </section>
+
+    <!-- ===================== HOME ===================== -->
+    <section class="view" id="view-home" data-view>
+      <div class="home-head">
+        <div class="greeting">
+          <div>
+            <p class="muted small">Hola,</p>
+            <h2 id="homeNombre">Usuario</h2>
+          </div>
+          <span class="chip" id="homeRolChip">Estudiante</span>
+        </div>
+        <div class="aviso-cuenta" id="avisoCuenta" hidden></div>
+      </div>
+
+      <div class="card qr-card">
+        <div class="qr-card-head">
+          <h3>Tu código de acceso</h3>
+          <span class="status-dot ok"></span>
+        </div>
+        <canvas id="qrCanvas" width="160" height="160"></canvas>
+        <p class="muted small" id="qrId">ID: —</p>
+        <p class="hint center">Muéstralo al lector antes de la pluma para entrar o salir.</p>
+      </div>
+
+      <div class="card" id="reservaActivaCard" hidden>
+        <div class="card-head-row">
+          <h3>Reservación activa</h3>
+          <span class="timer" id="homeTimer">20:00</span>
+        </div>
+        <p>Lugar <strong id="homeSpotId">—</strong></p>
+        <div class="btn-row" id="homeAccionesReserva"></div>
+      </div>
+
+      <div class="card" id="trabajadorCard" hidden>
+        <div class="card-head-row">
+          <h3>Tu espacio de trabajador</h3>
+        </div>
+        <p>Lugar asignado <strong id="workerSpotId">—</strong> · Horario <span id="workerHorario">—</span></p>
+        <button class="btn-secondary" id="btnLiberarEspacio">Liberar mi espacio ahora</button>
+        <p class="hint" id="workerEstadoTexto"></p>
+      </div>
+
+      <div class="card" id="homeMiniStatsCard">
+        <div class="card-head-row">
+          <h3>Estacionamiento ahora</h3>
+        </div>
+        <div class="mini-stats" id="miniStats"></div>
+        <button class="btn-secondary" data-goto="mapa">Ver mapa completo</button>
+      </div>
+
+      <div class="card" id="homeAventonCard">
+        <div class="card-head-row">
+          <h3>¿Vienes en auto?</h3>
+        </div>
+        <p class="muted small">Comparte tu ruta con otros estudiantes o trabajadores y libera espacios en el estacionamiento.</p>
+        <button class="btn-secondary" data-goto="aventon">Buscar o dar aventón</button>
+      </div>
+    </section>
+
+    <!-- ===================== MAPA ===================== -->
+    <section class="view" id="view-mapa" data-view>
+      <h2>Mapa del estacionamiento</h2>
+      <p class="muted small">Toca un espacio disponible para reservarlo. La reservación se libera si no llegas en 20 minutos.</p>
+
+      <div class="legend">
+        <span><i class="dot disponible"></i>Disponible</span>
+        <span><i class="dot reservado"></i>Reservado</span>
+        <span><i class="dot ocupado"></i>Ocupado</span>
+        <span><i class="dot trabajador"></i>Trabajadores</span>
+      </div>
+
+      <div class="lot-wrap">
+        <div class="lot" id="lot">
+          <!-- generado por JS -->
+        </div>
+      </div>
+
+      <div class="caption-row" id="lotCaption"></div>
+    </section>
+
+    <!-- ===================== RESERVAS ===================== -->
+    <section class="view" id="view-reservas" data-view>
+      <h2>Mis reservas</h2>
+
+      <div class="card" id="reservaCardDetalle">
+        <p class="muted">No tienes una reservación activa.</p>
+      </div>
+
+      <h3 class="section-title">Historial</h3>
+      <div id="historialReservas" class="list"></div>
+    </section>
+
+    <!-- ===================== REPORTES ===================== -->
+    <section class="view" id="view-reportes" data-view>
+      <h2>Reportes</h2>
+      <p class="muted small">Reporta a un vehículo que invade espacios o incumple las reglas del estacionamiento.</p>
+
+      <form id="formReporte" class="card" novalidate>
+        <label>Placa del vehículo
+          <input type="text" id="repPlaca" placeholder="Ej. TAM-1234" maxlength="12" required>
+        </label>
+        <label>Motivo
+          <select id="repMotivo">
+            <option>Invade dos espacios</option>
+            <option>Ocupa un lugar sin autorización</option>
+            <option>Ocupa espacio de trabajadores sin ser trabajador</option>
+            <option>Otro</option>
+          </select>
+        </label>
+        <label>Descripción
+          <textarea id="repDescripcion" placeholder="Describe brevemente lo ocurrido (mínimo 10 caracteres)" maxlength="300" required></textarea>
+        </label>
+        <div class="form-errors" id="repErrores" role="alert" hidden></div>
+        <button type="submit" class="btn-primary">Enviar reporte</button>
+      </form>
+
+      <h3 class="section-title">Reglas del estacionamiento</h3>
+      <div class="rules-card card">
+        <ol>
+          <li>Cada vehículo permanece dentro de su espacio, sin invadir otro.</li>
+          <li>Los espacios de trabajadores solo se usan fuera de su horario laboral cuando el trabajador los libera.</li>
+        </ol>
+        <p class="muted small">Esquema de sanciones: 1er reporte → advertencia · 2do → 1 día de sanción · 3ro → 2 días · más de 3 → revisión de administración.</p>
+      </div>
+
+      <h3 class="section-title">Reportes recientes</h3>
+      <div id="listaReportes" class="list"></div>
+    </section>
+
+    <!-- ===================== AVENTÓN COMPARTIDO ===================== -->
+    <section class="view" id="view-aventon" data-view>
+      <h2>Aventón compartido</h2>
+      <p class="muted small">Comparte tu ruta con otros miembros de la comunidad UAT. Menos autos circulando, más lugares libres en el estacionamiento.</p>
+
+      <div class="card" id="aventonImpacto"></div>
+
+      <div class="tabs" id="aventonTabs">
+        <button class="tab active" data-vtab="explorar">Explorar</button>
+        <button class="tab" data-vtab="publicar">Mi ruta</button>
+        <button class="tab" data-vtab="solicitudes">Solicitudes<span class="tab-badge" id="tabBadgeSolicitudes" hidden>0</span></button>
+        <button class="tab" data-vtab="viajes">Mis viajes</button>
+      </div>
+
+      <!-- EXPLORAR -->
+      <div class="vpane active" data-vpane="explorar">
+        <div class="filters-row">
+          <label class="check-inline"><input type="checkbox" id="filtroCompatibles" checked> Solo compatibles</label>
+          <span class="muted small" id="explorarResumen"></span>
+        </div>
+        <div id="aventonMatches" class="list"></div>
+      </div>
+
+      <!-- MI RUTA -->
+      <div class="vpane" data-vpane="publicar">
+        <div class="card" id="rideResumen" hidden>
+          <div class="card-head-row"><h3>Tu ruta publicada</h3></div>
+          <div id="rideResumenBody"></div>
+          <div class="btn-row">
+            <button type="button" class="btn-secondary" id="btnEditarRide">Editar</button>
+            <button type="button" class="btn-ghost" id="btnCancelarRide">Cancelar ruta</button>
+          </div>
+        </div>
+
+        <form class="card" id="formAventon">
+          <h3>Publica tu ruta</h3>
+          <div class="segmented" id="aventonTipoSeg">
+            <button type="button" class="seg active" data-tipo="ofrezco">Ofrezco aventón</button>
+            <button type="button" class="seg" data-tipo="busco">Busco aventón</button>
+          </div>
+
+          <label>Zona o colonia aproximada
+            <input type="text" id="aventonZona" list="zonasList" placeholder="Ej. Tamatán" required>
+            <datalist id="zonasList">
+              <option value="Centro"></option>
+              <option value="Libertad"></option>
+              <option value="Tamatán"></option>
+            </datalist>
+          </label>
+          <label>Horario aproximado de llegada al campus
+            <input type="time" id="aventonHorario" value="07:00" required>
+          </label>
+          <label>Días
+            <div class="days-row" id="aventonDias">
+              <button type="button" class="seg-day active" data-day="Lun">L</button>
+              <button type="button" class="seg-day active" data-day="Mar">Ma</button>
+              <button type="button" class="seg-day active" data-day="Mié">Mi</button>
+              <button type="button" class="seg-day active" data-day="Jue">J</button>
+              <button type="button" class="seg-day active" data-day="Vie">V</button>
+            </div>
+          </label>
+          <label id="aventonAsientosWrap">Lugares disponibles en tu auto
+            <input type="number" id="aventonAsientos" min="1" max="6" value="2">
+          </label>
+          <label>Punto de encuentro
+            <input type="text" id="aventonPunto" placeholder="Ej. Frente al Oxxo de la esquina" required>
+            <span class="file-hint">Solo se revela a quien aceptes (o a quien te acepte).</span>
+          </label>
+          <label>Notas (opcional)
+            <textarea id="aventonNotas" placeholder="Detalles de tu ruta, preferencias, etc."></textarea>
+          </label>
+          <button type="submit" class="btn-primary">Publicar ruta</button>
+          <p class="hint">En la lista pública solo aparece tu zona aproximada. El punto de encuentro y tu correo se muestran únicamente cuando ya hay un viaje aceptado.</p>
+        </form>
+      </div>
+
+      <!-- SOLICITUDES -->
+      <div class="vpane" data-vpane="solicitudes">
+        <h3>Recibidas</h3>
+        <div id="aventonRecibidas" class="list"></div>
+        <h3 class="section-title">Enviadas</h3>
+        <div id="aventonSolicitudes" class="list"></div>
+      </div>
+
+      <!-- MIS VIAJES -->
+      <div class="vpane" data-vpane="viajes">
+        <div id="aventonViajes" class="list"></div>
+      </div>
+    </section>
+
+    <!-- ===================== NOTIFICACIONES ===================== -->
+    <section class="view" id="view-notificaciones" data-view>
+      <h2>Notificaciones</h2>
+      <div id="listaNotificaciones" class="list"></div>
+    </section>
+
+    <!-- ===================== PERFIL ===================== -->
+    <section class="view" id="view-perfil" data-view>
+      <h2>Perfil</h2>
+      <div class="card">
+        <p><strong id="perfilNombre">—</strong></p>
+        <p class="muted small" id="perfilCorreo">—</p>
+        <p class="muted small" id="perfilId">—</p>
+        <span class="chip" id="perfilRolChip">Estudiante</span>
+      </div>
+
+      <div class="card" id="perfilVehiculoCard">
+        <h3>Vehículo</h3>
+        <div id="perfilVehiculoInfo" class="muted small">Sin vehículo registrado.</div>
+        <button class="btn-secondary" data-goto="vehiculo">Editar vehículo</button>
+      </div>
+
+      <button class="btn-secondary" id="btnAcerca">Acerca de este proyecto</button>
+      <button class="btn-ghost" id="btnLogout">Cerrar sesión</button>
+    </section>
+
+    <!-- ===================== ADMIN ===================== -->
+    <section class="view" id="view-admin" data-view>
+      <h2>Administración</h2>
+      <p class="muted small">Panel de control del estacionamiento: usuarios, vehículos, accesos, reservas y reportes.</p>
+
+      <div class="kpi-grid" id="adminKpis"></div>
+
+      <div class="card" id="adminOcupacion"></div>
+
+      <input type="search" id="adminSearch" class="admin-search" placeholder="Buscar por nombre, matrícula o placa">
+
+      <div class="tabs" id="adminTabs">
+        <button class="tab active" data-atab="usuarios">Usuarios</button>
+        <button class="tab" data-atab="validaciones">Validaciones<span class="tab-badge" id="tabBadgeValidaciones" hidden>0</span></button>
+        <button class="tab" data-atab="vehiculos">Vehículos</button>
+        <button class="tab" data-atab="accesos">Accesos</button>
+        <button class="tab" data-atab="reservas">Reservas</button>
+        <button class="tab" data-atab="viajes">Viajes</button>
+        <button class="tab" data-atab="reportes">Reportes</button>
+      </div>
+
+      <div class="apane active" data-apane="usuarios">
+        <div id="adminUsuarios" class="list"></div>
+      </div>
+      <div class="apane" data-apane="validaciones">
+        <p class="muted small" style="margin-bottom:10px;">Cuentas nuevas pendientes de revisión. Compara el documento con los datos del registro antes de validar.</p>
+        <div id="adminValidaciones" class="list"></div>
+      </div>
+      <div class="apane" data-apane="vehiculos">
+        <div id="adminVehiculos" class="list"></div>
+      </div>
+      <div class="apane" data-apane="accesos">
+        <div id="adminAccesos" class="list"></div>
+      </div>
+      <div class="apane" data-apane="reservas">
+        <div id="adminReservas" class="list"></div>
+      </div>
+      <div class="apane" data-apane="viajes">
+        <div id="adminViajes" class="list"></div>
+      </div>
+      <div class="apane" data-apane="reportes">
+        <div id="adminReportes" class="list"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- NAV INFERIOR -->
+  <nav class="bottomnav" id="bottomnav" hidden>
+    <button data-goto="admin" class="nav-item" data-roles="admin">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 3h8v10H3zm10 0h8v6h-8zM3 15h8v6H3zm10-4h8v10h-8z" fill="currentColor"/></svg>
+      <span>Panel</span>
+    </button>
+    <button data-goto="home" class="nav-item active" data-roles="user">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 3 2 12h3v8h6v-5h2v5h6v-8h3z" fill="currentColor"/></svg>
+      <span>Inicio</span>
+    </button>
+    <button data-goto="mapa" class="nav-item">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" fill="currentColor"/></svg>
+      <span>Mapa</span>
+    </button>
+    <button data-goto="reservas" class="nav-item" data-roles="user">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2zm12 8v10H5V10z" fill="currentColor"/></svg>
+      <span>Reservas</span>
+    </button>
+    <button data-goto="aventon" class="nav-item" data-roles="user">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M5 11l1.4-4.3A2 2 0 0 1 8.3 5.3h7.4a2 2 0 0 1 1.9 1.4L19 11h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1.1a2 2 0 1 1-3.8 0H8.9a2 2 0 1 1-3.8 0H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1zm2.1 0h9.8l-1-3H8.1z" fill="currentColor"/></svg>
+      <span>Aventón</span>
+    </button>
+    <button data-goto="reportes" class="nav-item" data-roles="user">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2 1 21h22zm0 6 6.5 11h-13z" fill="currentColor"/></svg>
+      <span>Reportes</span>
+    </button>
+    <button data-goto="perfil" class="nav-item">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5z" fill="currentColor"/></svg>
+      <span>Perfil</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- MODAL GENÉRICO -->
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal">
+    <h3 id="modalTitle">Título</h3>
+    <div id="modalBody"></div>
+    <div class="btn-row" id="modalActions"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
